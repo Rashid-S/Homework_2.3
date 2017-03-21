@@ -1,29 +1,38 @@
-# pip instal pyyaml
 import json
-import yaml
-from pprint import pprint
 
-cook_book = {
-  'Яичница': [
-    {'ingredient_name': 'яйца', 'quantity': 2, 'measure': 'шт.'},
-    {'ingredient_name': 'помидоры', 'quantity': 100, 'measure': 'гр.'}
-    ],
-  'Стейк': [
-    {'ingredient_name': 'говядина', 'quantity': 300, 'measure': 'гр.'},
-    {'ingredient_name': 'специи', 'quantity': 5, 'measure': 'гр.'},
-    {'ingredient_name': 'масло', 'quantity': 10, 'measure': 'мл.'}
-    ],
-  'Салат': [
-    {'ingredient_name': 'помидоры', 'quantity': 100, 'measure': 'гр.'},
-    {'ingredient_name': 'огурцы', 'quantity': 100, 'measure': 'гр.'},
-    {'ingredient_name': 'масло', 'quantity': 100, 'measure': 'мл.'},
-    {'ingredient_name': 'лук', 'quantity': 1, 'measure': 'шт.'}
-    ]
-  }
 
-with open('cook_book.json', 'w') as f:
-    json.dump(cook_book, f, ensure_ascii=False, indent=2)
+def get_cook_book():
+    with open('cook_book.json', 'r') as f:
+        cook_book = json.load(f)
+    return cook_book
 
-with open('cook_book.yml', 'w', encoding='utf-8') as g:
-    yaml.dump(cook_book, g, allow_unicode = True)
 
+def get_shop_list_by_dishes(dishes, person_count, cook_book):
+    shop_list = {}
+    for dish in dishes:
+        for ingredient in cook_book[dish.title()]:
+            new_shop_list_item = dict(ingredient)
+            new_shop_list_item['quantity'] *= person_count
+            if new_shop_list_item['ingredient_name'] not in shop_list:
+                shop_list[new_shop_list_item['ingredient_name']] = new_shop_list_item
+            else:
+                shop_list[new_shop_list_item['ingredient_name']]['quantity'] += new_shop_list_item['quantity']
+    return shop_list
+
+
+def print_shop_list(shop_list):
+    for shop_list_item in shop_list.values():
+        print('{} {} {}'.format(shop_list_item['ingredient_name'], shop_list_item['quantity'],
+                                shop_list_item['measure']))
+
+
+def create_shop_list():
+    person_count = int(input('Введите количество персон: '))
+    dishes = input('Введите блюдо из расчета на одну персону'
+                   '(несколько блюд разделяйте их знаком "/"): ').lower().split(',')
+    cook_book = get_cook_book()
+    shop_list = get_shop_list_by_dishes(dishes, person_count, cook_book)
+    print_shop_list(shop_list)
+
+if __name__ == "__main__":
+    create_shop_list()
